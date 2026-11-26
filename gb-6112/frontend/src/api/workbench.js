@@ -11,5 +11,7 @@ export const api = {
   review: id => request(`/runs/${id}/review`),
   submitReview: (id, data) => request(`/runs/${id}/review`, {method: "POST", data}),
   export: id => request(`/runs/${id}/export`, {raw: true}),
+  retentionSweep: () => request("/maintenance/retention-sweep", {method: "POST"}),
+  archives: () => request("/maintenance/archives"),
   audit: () => request("/audit", {signal: AbortSignal.timeout(5000)}),
 };

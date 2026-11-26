@@ -8,6 +8,7 @@ x-app: &app
     JWT_SECRET: ${JWT_SECRET:-local-demo-replace-with-a-random-secret-20261124}
     DEMO_PASSWORD: ${DEMO_PASSWORD:-Demo-DbWorkbench-2026}
     SEED_DEMO: ${SEED_DEMO:-true}
+    RETENTION_DAYS: ${RETENTION_DAYS:-90}
   volumes:
     - evidence:/var/lib/workbench
 services:

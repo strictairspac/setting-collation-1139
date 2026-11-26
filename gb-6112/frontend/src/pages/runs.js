@@ -7,9 +7,14 @@ import { el } from "../utils/dom.js";
 import { time } from "../utils/format.js";
 
 function reportState(run) {
-  return el("div", {class: "stack", id: "run-state"}, status(run.status),
-    el("p", {}, run.status === "queued" ? "后台正在处理，页面会自动更新。" : run.failure || run.result?.summary),
-    run.status === "done" ? el("a", {class: "button", href: `#evidence/${run.id}`}, "查看业务证据") : null);
+  const hint = {
+    queued: "后台正在处理，页面会自动更新。",
+    archived: "保留期届满且已签署，交接单已转归档盘，仍可在改号交接页从原入口下载。",
+    cleared: "保留期届满时未签署，试写结果已清理，仅保留批次记录。",
+  }[run.status] || run.failure || run.result?.summary;
+  const toEvidence = ["done", "archived", "cleared"].includes(run.status)
+    ? el("a", {class: "button", href: `#evidence/${run.id}`}, "查看交接记录") : null;
+  return el("div", {class: "stack", id: "run-state"}, status(run.status), el("p", {}, hint), toEvidence);
 }
 
 export async function runsPage(config, route, signal) {

@@ -1,13 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, Response
 
 from src.config.resources import engine
-from src.constants.job_state import JobState
 from src.controllers.access import identity, reviewer
 from src.controllers.workbench import new_review
 from src.schemas.reviews import ReviewEntry, ReviewInput
 from src.schemas.runs import RunEntry
-from src.services import reviews, runs
-from src.utils.serial import canonical_json
+from src.services import handover, reviews, runs
 
 router = APIRouter(prefix="/runs", tags=["Execution"])
 
@@ -38,11 +36,9 @@ def sign(run_id: int, form: ReviewInput, user=Depends(reviewer)):
 
 @router.get("/{run_id}/export", dependencies=[Depends(identity)])
 def export(run_id: int):
+    # 同一入口同时服务库内原件与已归档副本，批次号、校验值和签署保持不变。
     with engine.connect() as db:
-        run = runs.get(db, run_id)
-        if run["status"] != JobState.DONE:
-            raise HTTPException(409, "没有可导出的执行结果")
-        run["review"] = reviews.get(db, run_id)
-    return Response(canonical_json(run), media_type="application/json", headers={
-        "Content-Disposition": f"attachment; filename=evidence-{run_id}.json",
+        content, filename = handover.build_export(db, run_id)
+    return Response(content, media_type="application/json", headers={
+        "Content-Disposition": f"attachment; filename={filename}",
     })

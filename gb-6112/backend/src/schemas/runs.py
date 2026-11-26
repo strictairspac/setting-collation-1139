@@ -15,6 +15,7 @@ class RunEntry(BaseModel):
     actor: str
     created_at: int
     finished_at: int | None
+    # 整理后（archived/cleared）库内不再保留试写结果与校验值，可能为 None
     result: dict | None
     failure: str | None
     digest: str | None
